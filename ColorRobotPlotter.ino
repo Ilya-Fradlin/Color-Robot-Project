@@ -68,7 +68,7 @@ Code by lingib
 Last update 17/03/2016
 */
 
-# Include <Servo.h>
+#include <Servo.h>
 
 /***************************************************************************
  DECLARATIONS AND GLOBALS
@@ -142,7 +142,7 @@ void setup()
   //-------------------------------
 	// delay to let the entire hardware time to stabilize
 	//-------------------------------
-  delayMicroseconds(DELAY)
+  delayMicroseconds(DELAY);
 
 	//-------------------------------
 	// initialise motor1-x (left-wheel)
@@ -174,17 +174,17 @@ void setup()
   //-------------------------------
 	// delay to let the entire hardware time to stabilize
 	//-------------------------------
-  delayMicroseconds(DELAY)
+  delayMicroseconds(DELAY);
 
 	//-------------------------------
 	// pen-lift
 	//-------------------------------
-	pinMode(pen, OUTPUT);										//D3
+	pinMode(pen, OUTPUT);
   delayMicroseconds(DELAY);
   myservo.attach(pen);
   delayMicroseconds(DELAY);
-  for (pos = myservo.read(); pos <= PEN_UP_DEGREE; pos += SERVO_STEP) {
-    myservo.write(pos);
+  for (pen_position = myservo.read(); pen_position <= PEN_UP_DEGREE; pen_position += SERVO_STEP) {
+    myservo.write(pen_position);
     delay(100);
   }
   delayMicroseconds(DELAY);
@@ -198,7 +198,7 @@ void setup()
   //-------------------------------
   // delay to let the entire hardware time to stabilize
   //-------------------------------
-  delay(100)
+  delay(100);
 }
 
 /***************************************************************************
@@ -522,8 +522,7 @@ void rotate(float angle, bool turn_ccw){
 
   	//allow rotor time to move to next step and determines plotting speed
     delayMicroseconds(DELAY);
-		}
-	}
+  }
 }
 
 /***************************************************************************
@@ -663,8 +662,8 @@ void test_pattern(){
  Raise the pen
  ***************************************************************************/
 void pen_up(){
-  for (pos = PEN_DOWN_DEGREE; pos <= PEN_UP_DEGREE; pos += SERVO_STEP) {
-    myservo.write(pos);
+  for (pen_position = PEN_DOWN_DEGREE; pen_position <= PEN_UP_DEGREE; pen_position += SERVO_STEP) {
+    myservo.write(pen_position);
     delay(100);
   }
 }
@@ -674,8 +673,8 @@ void pen_up(){
  Lower the pen
  ***************************************************************************/
 void pen_down(){
-  for (pos = PEN_UP_DEGREE; pos <= PEN_DOWN_DEGREE; pos += SERVO_STEP) {
-    myservo.write(pos);
+  for (pen_position = PEN_UP_DEGREE; pen_position <= PEN_DOWN_DEGREE; pen_position += SERVO_STEP) {
+    myservo.write(pen_position);
     delay(100);
   }
 }
