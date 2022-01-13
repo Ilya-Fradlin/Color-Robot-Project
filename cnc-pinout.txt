@@ -1,0 +1,13 @@
+x.dir - 5 (digital)
+x.step - 2 (digital)
+y.dir - 6 (digital)
+y.step - 3 (digital)
+z.dir - 7(digital)
+z.step - 4(digital)
+
+
+pin 9 (digital) - END STOPS X- AND X+ (white)
+pin 10 (digital) - END STOPS Y- AND Y+ (white)
+pin 11 (digital) - END STOPS Z- AND Z+ (white)
+   -->
+near it is the ground (black row)

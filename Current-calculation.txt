@@ -1,0 +1,5 @@
+Motor A - Voltage: 12 , Current: 0.3 A
+Motor B - Voltage: 12 , Current: 0.3 A
+Motor C (up) - 400 mA = 0.4 A
+Servo Motor - can also take up do 0.45A when in torque mode.
+Bluetooth -
