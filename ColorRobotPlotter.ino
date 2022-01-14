@@ -350,9 +350,9 @@ void process_commands(){
 		}
 	}
   //--------------------------------------------------
-  int mcode = get_value('C', -1);		//Get M code
+  int ccode = get_value('C', -1);		//Get M code
   //--------------------------------------------------
-  switch (mcode){
+  switch (ccode){
     case 101:{						//turn the color wheel a quarter of a circle
       switch_color(1);
       break;
