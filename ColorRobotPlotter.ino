@@ -103,8 +103,8 @@ bool direction = FORWARD;				//default travel direction
 byte pattern;							//used for bitwise motor control
 
 // pen-lift definitions ------------------
-#define PEN_UP_DEGREE 165
-#define PEN_DOWN_DEGREE 25
+#define PEN_UP_DEGREE 160
+#define PEN_DOWN_DEGREE 85
 #define SERVO_STEP 5
 int pen = 9;							//pen-lift servo
 int pen_position = 0;
@@ -349,6 +349,30 @@ void process_commands(){
 			break;
 		}
 	}
+  //--------------------------------------------------
+  int mcode = get_value('C', -1);		//Get M code
+  //--------------------------------------------------
+  switch (mcode){
+    case 101:{						//turn the color wheel a quarter of a circle
+      switch_color(1);
+      break;
+    }
+    case 102:{						//turn the color wheel half of a circle
+      switch_color(2);
+      break;
+    }
+    case 103:{						//turn the color wheel three quarters of a circle
+      switch_color(3);
+      break;
+    }
+    case 104:{						//turn the color wheel a full circle
+      switch_color(4);
+      break;
+    }
+    default:{
+      break;
+    }
+  }
 }
 
 /***************************************************************************
@@ -662,6 +686,9 @@ void test_pattern(){
  Raise the pen
  ***************************************************************************/
 void pen_up(){
+  if (myservo.read() >= PEN_UP_DEGREE) {
+    return;
+  }
   for (pen_position = PEN_DOWN_DEGREE; pen_position <= PEN_UP_DEGREE; pen_position += SERVO_STEP) {
     myservo.write(pen_position);
     delay(100);
@@ -673,8 +700,26 @@ void pen_up(){
  Lower the pen
  ***************************************************************************/
 void pen_down(){
-  for (pen_position = PEN_UP_DEGREE; pen_position <= PEN_DOWN_DEGREE; pen_position += SERVO_STEP) {
+  if (myservo.read() <= PEN_DOWN_DEGREE) {
+    return;
+  }
+  for (pen_position = PEN_UP_DEGREE; pen_position >= PEN_DOWN_DEGREE; pen_position -= SERVO_STEP) {
     myservo.write(pen_position);
+    delay(100);
+  }
+}
+
+/***************************************************************************
+ Switch the color by the amount of steps given.
+ ***************************************************************************/
+void switch_color(int turns){
+  pen_up();
+  int upper_motor_step = 0;
+  int steps_required = 12 * turns;
+  for (upper_motor_step = 0;  steps_required; upper_motor_step) {
+    digitalWrite(STEP_Z, HIGH);
+    delay(10);
+    digitalWrite(STEP_Z, HIGH);
     delay(100);
   }
 }
