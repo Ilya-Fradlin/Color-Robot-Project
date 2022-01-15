@@ -689,7 +689,7 @@ void pen_up(){
   if (myservo.read() >= PEN_UP_DEGREE) {
     return;
   }
-  for (pen_position = PEN_DOWN_DEGREE; pen_position <= PEN_UP_DEGREE; pen_position += SERVO_STEP) {
+  for (pen_position = myservo.read(); pen_position <= PEN_UP_DEGREE; pen_position += SERVO_STEP) {
     myservo.write(pen_position);
     delay(100);
   }
@@ -703,7 +703,7 @@ void pen_down(){
   if (myservo.read() <= PEN_DOWN_DEGREE) {
     return;
   }
-  for (pen_position = PEN_UP_DEGREE; pen_position >= PEN_DOWN_DEGREE; pen_position -= SERVO_STEP) {
+  for (pen_position = myservo.read(); pen_position >= PEN_DOWN_DEGREE; pen_position -= SERVO_STEP) {
     myservo.write(pen_position);
     delay(100);
   }
@@ -714,12 +714,11 @@ void pen_down(){
  ***************************************************************************/
 void switch_color(int turns){
   pen_up();
-  int upper_motor_step = 0;
   int steps_required = 12 * turns;
-  for (upper_motor_step = 0;  steps_required; upper_motor_step) {
+  for (int upper_motor_step = 0;  upper_motor_step < steps_required; upper_motor_step++) {
     digitalWrite(STEP_Z, HIGH);
     delay(10);
-    digitalWrite(STEP_Z, HIGH);
+    digitalWrite(STEP_Z, LOW);
     delay(100);
   }
 }
