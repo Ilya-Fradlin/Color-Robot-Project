@@ -103,9 +103,9 @@ bool direction = FORWARD;				//default travel direction
 byte pattern;							//used for bitwise motor control
 
 // pen-lift definitions ------------------
-#define SERVO_STEP 5
+#define SERVO_STEP 1
 #define PEN_UP_DEGREE 164
-int PEN_DOWN_DEGREE = 70;
+int PEN_DOWN_DEGREE = 90;
 int pen = 9;							//pen-lift servo
 int pen_position = 0;
 
@@ -125,7 +125,7 @@ char character;							//an actual character
 // plotter definitions -------------------
 float CWR_cal;							//holds trial CWR value when calibrating
 bool CWR_flag = false;					//indicates use "trial CWR value"
-#define CWR 3.0635						//CWR value for the robot (calculated = 3.0769 )
+#define CWR 3.0283						//CWR value for the robot (calculated = 3.0769 )
 #define BAUD 9600						//serial connection speed to Arduino
 
 bool SCALE_flag = false;				//indicates "use custom SCALE"
@@ -185,7 +185,7 @@ void setup()
   delayMicroseconds(DELAY);
   for (pen_position = myservo.read(); pen_position <= PEN_UP_DEGREE; pen_position += SERVO_STEP) {
     myservo.write(pen_position);
-    delay(100);
+    delay(20);
   }
   delayMicroseconds(DELAY);
 
@@ -345,9 +345,31 @@ void process_commands(){
 			pen_down();
 			break;
 		}
-		default:{
-			break;
-		}
+    case 106:{ 						//change lower servo limit
+      int new_limit = get_value('L', -1);
+      if (new_limit > 0){
+        Serial.print("PEN_DOWN_DEGREE is now ");
+        Serial.print(new_limit);
+        PEN_DOWN_DEGREE = new_limit;
+      } else {
+        Serial.println("Invalid PEN_DOWN_DEGREE ... try again");
+      }
+      break;
+    }
+    case 107:{ 				//Turn Around the same spot
+      int number_of_spins = get_value('R', -1);
+      if (number_of_spins > 0){
+        Serial.print("number of spins required is ");
+        Serial.print(number_of_spins);
+        rotate_full_spins(number_of_spins);
+      } else {
+        Serial.println("Invalid Number of turns ... try again");
+      }
+      break;
+    }
+    default:{
+      break;
+    }
 	}
 
   //--------------------------------------------------
@@ -373,28 +395,6 @@ void process_commands(){
     default:{
       break;
     }
-  }
-
-  //--------------------------------------------------
-  int lcode = get_value('L', -1);		//change lower servo limit
-  //--------------------------------------------------
-  if (lcode > 0){
-    Serial.print("PEN_DOWN_DEGREE is now ");
-    Serial.print(lcode);
-    PEN_DOWN_DEGREE = lcode;
-  } else {
-    Serial.println("Invalid PEN_DOWN_DEGREE ... try again");
-  }
-
-  //--------------------------------------------------
-  int rcode = get_value('R', -1);		//Turn Around the same spot
-  //--------------------------------------------------
-  if (rcode > 0){
-    Serial.print("number of spins required is ");
-    Serial.print(rcode);
-    rotate_full_spins(rcode);
-  } else {
-    Serial.println("Invalid Number of turns ... try again");
   }
 }
 
@@ -439,9 +439,9 @@ void menu() {
 	Serial.println(F("T103...................draw a test pattern"));
 	Serial.println(F("T104...................pen up"));
 	Serial.println(F("T105...................pen down"));
-  Serial.println(F("C##................... Switch the Color"));
-  Serial.println(F("R##....................Turn Around the same spot "));
-  Serial.println(F("L##....................Change the PEN_DOWN_DEGREE"));
+  Serial.println(F("C100 A##............... Switch the Color"));
+  Serial.println(F("T106 [L##].............PEN_DOWN_DEGREE "));
+  Serial.println(F("T107 [R##].............Turn Around the same spot "));
 	Serial.println(F("------------------------------------------------------"));
 }
 
@@ -717,7 +717,7 @@ void pen_up(){
   }
   for (pen_position = myservo.read(); pen_position <= PEN_UP_DEGREE; pen_position += SERVO_STEP) {
     myservo.write(pen_position);
-    delay(100);
+    delay(20);
   }
 }
 
@@ -731,7 +731,7 @@ void pen_down(){
   }
   for (pen_position = myservo.read(); pen_position >= PEN_DOWN_DEGREE; pen_position -= SERVO_STEP) {
     myservo.write(pen_position);
-    delay(100);
+    delay(20);
   }
 }
 
