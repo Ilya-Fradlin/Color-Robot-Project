@@ -103,8 +103,8 @@ bool direction = FORWARD;				//default travel direction
 byte pattern;							//used for bitwise motor control
 
 // pen-lift definitions ------------------
-#define PEN_UP_DEGREE 160
-#define PEN_DOWN_DEGREE 85
+#define PEN_UP_DEGREE 164
+int PEN_DOWN_DEGREE 80
 #define SERVO_STEP 5
 int pen = 9;							//pen-lift servo
 int pen_position = 0;
@@ -345,6 +345,28 @@ void process_commands(){
 			pen_down();
 			break;
 		}
+    case 106:{ 						//change lower servo limit
+      int new_limit = get_value('L', -1);
+      if (new_limit > 0){
+        Serial.print("PEN_DOWN_DEGREE is now ");
+        Serial.print(new_limit);
+        PEN_DOWN_DEGREE = new_limit;
+      } else {
+        Serial.println("Invalid PEN_DOWN_DEGREE ... try again");
+      }
+      break;
+    }
+    case 107:{ 				//Turn Around the same spot
+      int number_of_spins = get_value('R', -1);
+      if (number_of_spins > 0){
+        Serial.print("number of spins required is ");
+        Serial.print(number_of_spins);
+        rotate_full_spins(number_of_spins);
+      } else {
+        Serial.println("Invalid Number of turns ... try again");
+      }
+      break;
+    }
 		default:{
 			break;
 		}
@@ -416,6 +438,8 @@ void menu() {
 	Serial.println(F("T103...................draw a test pattern"));
 	Serial.println(F("T104...................pen up"));
 	Serial.println(F("T105...................pen down"));
+  Serial.println(F("T106 [L##].............PEN_DOWN_DEGREE "));
+  Serial.println(F("T107 [R##].............Turn Around the same spot "));
 	Serial.println(F("------------------------------------------------------"));
 }
 
@@ -605,7 +629,7 @@ void move(float distance){
 /***************************************************************************
  SQUARE
  Adjust CWR until square is a perfect closed loop. If CWR is too small the
- square will be open at one corner. If th CWR is too big then the start
+ square will be open at one corner. If the CWR is too big then the start
  point will protrude.
  ***************************************************************************/
 void square(){
@@ -715,10 +739,57 @@ void pen_down(){
 void switch_color(int turns){
   pen_up();
   int steps_required = 12 * turns;
-  for (int upper_motor_step = 0;  upper_motor_step < steps_required; upper_motor_step++) {
+  for (int upper_motor_step = 0; upper_motor_step < steps_required; upper_motor_step++) {
     digitalWrite(STEP_Z, HIGH);
     delay(10);
     digitalWrite(STEP_Z, LOW);
     delay(100);
+  }
+}
+
+/***************************************************************************
+ Rotate on the same spot the number of rounds requested.
+ ***************************************************************************/
+void rotate_full_spins(int number_of_spins){
+
+	//--------------------
+	// initialise
+	//--------------------
+ 	int step = 0;								//pattern counter
+ 	int steps;									//number of motor steps
+  byte pattern = PORTD;
+
+  // ----- set motor directions
+  SET(pattern, DIRECTION_X);
+  SET(pattern, DIRECTION_Y);
+  PORTD = pattern;
+  delayMicroseconds(PULSE_WIDTH);     //wait for direction lines to stabilise
+
+  // ----- calculate steps amount required
+  /*
+     The calculation is based on the CWR constant, whether its a test or execution
+  */
+	if (CWR_flag){
+		steps = abs((int)(2*PI*number_of_spins*RAD_TO_DEG*STEPS_PER_REV/360*CWR_cal));
+	} else {
+		steps = abs((int)(2*PI*number_of_spins*RAD_TO_DEG*STEPS_PER_REV/360*CWR));
+	}
+
+	//-------------------------------------
+ 	// rotate the robot a specific angle
+ 	//-------------------------------------
+	while (steps-- > 0){
+    SET(pattern, STEP_X);
+    SET(pattern, STEP_Y);
+    PORTD = pattern;
+    delayMicroseconds(PULSE_WIDTH);  //mandatory delay
+
+    // ----- create trailing-edge of step-pulse(s)
+    pattern = CLR(pattern, STEP_X);
+    pattern = CLR(pattern, STEP_Y);
+    PORTD = pattern;
+
+  	//allow rotor time to move to next step and determines plotting speed
+    delayMicroseconds(DELAY);
   }
 }
