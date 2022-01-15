@@ -103,9 +103,9 @@ bool direction = FORWARD;				//default travel direction
 byte pattern;							//used for bitwise motor control
 
 // pen-lift definitions ------------------
-#define PEN_UP_DEGREE 164
-int PEN_DOWN_DEGREE 80
 #define SERVO_STEP 5
+#define PEN_UP_DEGREE 164
+int PEN_DOWN_DEGREE 90
 int pen = 9;							//pen-lift servo
 int pen_position = 0;
 
