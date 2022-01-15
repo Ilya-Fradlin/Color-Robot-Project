@@ -105,7 +105,7 @@ byte pattern;							//used for bitwise motor control
 // pen-lift definitions ------------------
 #define SERVO_STEP 5
 #define PEN_UP_DEGREE 164
-int PEN_DOWN_DEGREE 90
+int PEN_DOWN_DEGREE = 90;
 int pen = 9;							//pen-lift servo
 int pen_position = 0;
 
