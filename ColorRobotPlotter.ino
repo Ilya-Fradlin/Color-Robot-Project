@@ -104,8 +104,14 @@ byte pattern;							//used for bitwise motor control
 
 // pen-lift definitions ------------------
 #define SERVO_STEP 1
-#define PEN_UP_DEGREE 164
-int PEN_DOWN_DEGREE = 90;
+#define PEN_UP_DEGREE 179
+#define BLACK_LOWER_DEGREE 01
+#define BLUE_LOWER_DEGREE 01
+#define RED_LOWER_DEGREE 01
+#define GREEN_LOWER_DEGREE 01
+enum pen_color {black, blue, red, green};     //define color positions
+pen_color current_color = black;
+int PEN_DOWN_DEGREE = BLACK_LOWER_DEGREE;
 int pen = 9;							//pen-lift servo
 int pen_position = 0;
 
@@ -378,18 +384,30 @@ void process_commands(){
   switch (ccode){
     case 101:{						//turn the color wheel a quarter of a circle
       switch_color(1);
+      for (int i = 0; i < 1; i++) {
+        adjust_pen_down_limit();
+      }
       break;
     }
     case 102:{						//turn the color wheel half of a circle
       switch_color(2);
+      for (int i = 0; i < 2; i++) {
+        adjust_pen_down_limit();
+      }
       break;
     }
     case 103:{						//turn the color wheel three quarters of a circle
       switch_color(3);
+      for (int i = 0; i < 3; i++) {
+        adjust_pen_down_limit();
+      }
       break;
     }
     case 104:{						//turn the color wheel a full circle
       switch_color(4);
+      for (int i = 0; i < 4; i++) {
+        adjust_pen_down_limit();
+      }
       break;
     }
     default:{
@@ -793,5 +811,33 @@ void rotate_full_spins(int number_of_spins){
 
   	//allow rotor time to move to next step and determines plotting speed
     delayMicroseconds(DELAY);
+  }
+}
+
+void adjust_pen_down_limit(){
+  switch(current_color){
+    case black:{           //next color in line is blue
+      current_color = blue;
+      PEN_DOWN_DEGREE = BLUE_LOWER_DEGREE;
+      break;
+    }
+    case blue:{						//next color in line is red
+      current_color = red;
+      PEN_DOWN_DEGREE = RED_LOWER_DEGREE;
+      break;
+    }
+    case red:{						//next color in line is green
+      current_color = green;
+      PEN_DOWN_DEGREE = GREEN_LOWER_DEGREE;
+      break;
+    }
+    case green:{						//next color in line is black (cyclic order)
+      current_color = black;
+      PEN_DOWN_DEGREE = BLACK_LOWER_DEGREE;
+      break;
+    }
+    default:{
+      break;
+    }
   }
 }
