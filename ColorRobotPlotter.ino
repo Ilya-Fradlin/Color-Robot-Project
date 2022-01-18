@@ -104,11 +104,11 @@ byte pattern;							//used for bitwise motor control
 
 // pen-lift definitions ------------------
 #define SERVO_STEP 1
-#define PEN_UP_DEGREE 179
-#define BLACK_LOWER_DEGREE 01
-#define BLUE_LOWER_DEGREE 01
-#define RED_LOWER_DEGREE 01
-#define GREEN_LOWER_DEGREE 01
+#define PEN_UP_DEGREE 164
+#define BLACK_LOWER_DEGREE 62
+#define BLUE_LOWER_DEGREE 66
+#define RED_LOWER_DEGREE 55
+#define GREEN_LOWER_DEGREE 65
 enum pen_color {black, blue, red, green};     //define color positions
 pen_color current_color = black;
 int PEN_DOWN_DEGREE = BLACK_LOWER_DEGREE;
@@ -131,7 +131,7 @@ char character;							//an actual character
 // plotter definitions -------------------
 float CWR_cal;							//holds trial CWR value when calibrating
 bool CWR_flag = false;					//indicates use "trial CWR value"
-#define CWR 3.0283						//CWR value for the robot (calculated = 3.0769 )
+#define CWR 3.115						 //CWR value for the robot (calculated = 3.0769 )
 #define BAUD 9600						//serial connection speed to Arduino
 
 bool SCALE_flag = false;				//indicates "use custom SCALE"
