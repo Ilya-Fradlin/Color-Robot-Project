@@ -114,6 +114,7 @@ pen_color current_color = black;
 int PEN_DOWN_DEGREE = BLACK_LOWER_DEGREE;
 int pen = 9;							//pen-lift servo
 int pen_position = 0;
+bool pen_is_down = false;
 
 Servo myservo;
 
@@ -131,7 +132,7 @@ char character;							//an actual character
 // plotter definitions -------------------
 float CWR_cal;							//holds trial CWR value when calibrating
 bool CWR_flag = false;					//indicates use "trial CWR value"
-#define CWR 3.115						 //CWR value for the robot (calculated = 3.0769 )
+#define CWR 3.005						 //CWR value for the robot (calculated = 3.0769 )
 #define BAUD 9600						//serial connection speed to Arduino
 
 bool SCALE_flag = false;				//indicates "use custom SCALE"
@@ -574,6 +575,16 @@ void rotate(float angle, bool turn_ccw){
 		steps = abs((int)(angle*RAD_TO_DEG*STEPS_PER_REV/360*CWR));
 	}
 
+
+  //-------------------------------------
+ 	// raise the pen for the spin. (if its down)
+ 	//-------------------------------------
+  if (pen_is_down){
+    int pen_pistion_before_rotation = myservo.read();
+    pen_pistion_before_rotation += 25;
+    myservo.write(pen_pistion_before_rotation);
+    delay(60);
+  }
 	//-------------------------------------
  	// rotate the robot a specific angle
  	//-------------------------------------
@@ -590,6 +601,16 @@ void rotate(float angle, bool turn_ccw){
 
   	//allow rotor time to move to next step and determines plotting speed
     delayMicroseconds(DELAY);
+  }
+
+  //-------------------------------------
+  // lower back the pen
+  //-------------------------------------
+  if (pen_is_down){
+    for (pen_position = myservo.read(); pen_position >= PEN_DOWN_DEGREE; pen_position -= 5) {
+      myservo.write(pen_position);
+      delay(25);
+    }
   }
 }
 
@@ -730,6 +751,7 @@ void test_pattern(){
  Raise the pen
  ***************************************************************************/
 void pen_up(){
+  pen_is_down = false;
   if (myservo.read() >= PEN_UP_DEGREE) {
     return;
   }
@@ -744,6 +766,7 @@ void pen_up(){
  Lower the pen
  ***************************************************************************/
 void pen_down(){
+  pen_is_down = true;
   if (myservo.read() <= PEN_DOWN_DEGREE) {
     return;
   }
