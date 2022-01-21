@@ -11,6 +11,8 @@ import 'dart:ui' as ui;
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:file_picker/file_picker.dart';
+import './SelectBondedDevicePage.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -23,6 +25,7 @@ class _HomeState extends State<Home> {
   Widget? imageOutput;
   ByteData imgBytes = ByteData(1024);
   var img1;
+  BluetoothConnection? connection;
 
   void saveToImage(List<DrawingArea?> points) async {
     final recorder = ui.PictureRecorder();
@@ -53,7 +56,7 @@ class _HomeState extends State<Home> {
 
     File file = await writeBytes(listBytes);
 
-    fetchResponse(file);
+    fetchResponseFromDraw(file);
 
     setState(() {
       imgBytes = pngBytes;
@@ -70,13 +73,96 @@ class _HomeState extends State<Home> {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
     File? file;
     if (result != null) {
-      File file = File(result.files.single.path!);
+      // File file = File(result.files.single.path!);
+      file = File(result.files.single.path!);
       loadImage(file);
       fetchResponse(file);
     } else {
       // User canceled the picker
       _loading = true;
       return;
+    }
+  }
+
+  void fetchResponseFromDraw(File imageFile) async {
+    final mimeTypeData =
+        lookupMimeType(imageFile.path, headerBytes: [0xFF, 0xD8])!.split('/');
+    final imageUploadRequest = http.MultipartRequest(
+        'POST',
+        Uri.parse(
+            'http://192.168.1.138:5000/generate')); //PUT YOUR OWN IP HERE, it may vary depending on your computer
+
+    final file = await http.MultipartFile.fromPath('image', imageFile.path,
+        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
+
+    imageUploadRequest.fields['ext'] = mimeTypeData[1];
+    imageUploadRequest.files.add(file);
+
+    try {
+      final streamedResponse = await imageUploadRequest.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      print(' * STATUS CODE: ${response.statusCode}');
+
+      // uncomment after the testing of the sending ends
+      if (connection == null) {
+        final BluetoothDevice? selectedDevice =
+            await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) {
+              return SelectBondedDevicePage(checkAvailability: false);
+            },
+          ),
+        );
+        BluetoothConnection.toAddress(selectedDevice?.address)
+            .then((_connection) {
+          print('Connected to the device');
+          setState(() {
+            connection = _connection;
+          });
+        }).catchError((error) {
+          print('Cannot connect, exception occured');
+          print(error);
+        });
+      }
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      String g_code = responseData['result'];
+
+      //testing purpose delete afterwards
+      // List myList = [
+      //   "G01 X124 Y128",
+      //   "G00 X68 Y87",
+      //   "G01 X30 Y57",
+      //   "G01 X156 Y200",
+      //   "G00 X00 Y00"
+      // ];
+      await Future.delayed(Duration(seconds: 10));
+      //String dataString = String.fromCharCodes(buffer)
+      connection!.input!.listen(_onDataReceived);
+      List myList = g_code.split("\n");
+      for (int i = 0; i < myList.length; ++i) {
+        String text = myList[i];
+        _sendMessage(text, connection);
+      }
+    } catch (e) {
+      print(' * ERROR: ' + e.toString());
+      return null;
+    }
+  }
+
+  void _onDataReceived(Uint8List data) {
+    // Do Nothing on the recieved data
+  }
+
+  void _sendMessage(String text, BluetoothConnection? connection) async {
+    text = text.trim();
+    if (text.length > 0) {
+      try {
+        connection!.output.add(Uint8List.fromList(utf8.encode(text + "\r\n")));
+        await connection.output.allSent;
+      } catch (e) {
+        // Ignore error, but notify state
+        print("");
+      }
     }
   }
 
@@ -330,14 +416,12 @@ class _HomeState extends State<Home> {
                             height: 256, width: 256, child: imageOutput),
                       ),
                       // SizedBox(height: 30),
-                      // imgBytes != null
-                      //     ? Center(
+                      //      Center(
                       //         child: Image.memory(
                       //         Uint8List.view(imgBytes.buffer),
                       //         width: 256,
                       //         height: 256,
                       //       ))
-                      //     : Text('No image saved')
                     ],
                   ),
                 ),
