@@ -652,6 +652,15 @@ void test_pattern(){
 	move_to(136.738441, 145.187821);
 	pen_up();
 
+  // home --------------
+  move_to(0.0000, 0.0000);
+
+  // switch Color  (from Black to Blue)
+  switch_color(1);
+  for (int i = 0; i < 1; i++) {
+    adjust_pen_down_limit();
+  }
+
 	// back-slash -----------
 	pen_up();
 	move_to(37.813081, 210.330315);
@@ -660,12 +669,30 @@ void test_pattern(){
 	move_to(174.084903, 79.190066);
 	pen_up();
 
+  // home --------------
+  move_to(0.0000, 0.0000);
+
+  // switch Color  (from Blue to Red)
+  switch_color(1);
+  for (int i = 0; i < 1; i++) {
+    adjust_pen_down_limit();
+  }
+
 	// slash -------------
 	pen_up();
 	move_to(37.527994, 79.190066);
 	pen_down();
 	move_to(173.799816, 210.330315);
 	pen_up();
+
+  // home --------------
+	move_to(0.0000, 0.0000);
+
+  // switch Color  (from Red to Green)
+  switch_color(1);
+  for (int i = 0; i < 1; i++) {
+    adjust_pen_down_limit();
+  }
 
 	// square ------------
 	pen_up();
@@ -679,6 +706,12 @@ void test_pattern(){
 
 	// home --------------
 	move_to(0.0000, 0.0000);
+
+  // switch Color back to initial position (from Green to Black)
+  switch_color(1);
+  for (int i = 0; i < 1; i++) {
+    adjust_pen_down_limit();
+  }
 }
 
 /***************************************************************************
