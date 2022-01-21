@@ -15,6 +15,8 @@ import './SelectBondedDevicePage.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 class Home extends StatefulWidget {
+  final BluetoothDevice server;
+  const Home({required this.server});
   @override
   _HomeState createState() => _HomeState();
 }
@@ -26,6 +28,7 @@ class _HomeState extends State<Home> {
   ByteData imgBytes = ByteData(1024);
   var img1;
   BluetoothConnection? connection;
+  bool canProceedSending = false;
 
   void saveToImage(List<DrawingArea?> points) async {
     final recorder = ui.PictureRecorder();
@@ -90,7 +93,7 @@ class _HomeState extends State<Home> {
     final imageUploadRequest = http.MultipartRequest(
         'POST',
         Uri.parse(
-            'http://192.168.1.138:5000/generate')); //PUT YOUR OWN IP HERE, it may vary depending on your computer
+            'http://192.168.1.104:5000/generate')); //PUT YOUR OWN IP HERE, it may vary depending on your computer
 
     final file = await http.MultipartFile.fromPath('image', imageFile.path,
         contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
@@ -104,26 +107,13 @@ class _HomeState extends State<Home> {
       print(' * STATUS CODE: ${response.statusCode}');
 
       // uncomment after the testing of the sending ends
-      if (connection == null) {
-        final BluetoothDevice? selectedDevice =
-            await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) {
-              return SelectBondedDevicePage(checkAvailability: false);
-            },
-          ),
-        );
-        BluetoothConnection.toAddress(selectedDevice?.address)
-            .then((_connection) {
-          print('Connected to the device');
-          setState(() {
-            connection = _connection;
-          });
-        }).catchError((error) {
-          print('Cannot connect, exception occured');
-          print(error);
-        });
-      }
+      BluetoothConnection.toAddress(widget.server.address).then((_connection) {
+        print('Connected to the device');
+        connection = _connection;
+      }).catchError((error) {
+        print('Cannot connect, exception occured');
+        print(error);
+      });
       final Map<String, dynamic> responseData = json.decode(response.body);
       String g_code = responseData['result'];
 
@@ -136,12 +126,15 @@ class _HomeState extends State<Home> {
       //   "G00 X00 Y00"
       // ];
       await Future.delayed(Duration(seconds: 10));
-      //String dataString = String.fromCharCodes(buffer)
       connection!.input!.listen(_onDataReceived);
       List myList = g_code.split("\n");
       for (int i = 0; i < myList.length; ++i) {
         String text = myList[i];
         _sendMessage(text, connection);
+        while (canProceedSending == false) {
+          //Do Nothing until we can procceed to the next command
+        }
+        canProceedSending = false;
       }
     } catch (e) {
       print(' * ERROR: ' + e.toString());
@@ -151,6 +144,10 @@ class _HomeState extends State<Home> {
 
   void _onDataReceived(Uint8List data) {
     // Do Nothing on the recieved data
+    String dataString = String.fromCharCodes(data);
+    if (dataString.contains("19")) {
+      canProceedSending = true;
+    }
   }
 
   void _sendMessage(String text, BluetoothConnection? connection) async {
