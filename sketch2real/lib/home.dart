@@ -15,29 +15,47 @@ import './SelectBondedDevicePage.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 class Home extends StatefulWidget {
-  final BluetoothDevice server;
-  const Home({required this.server});
+  //final BluetoothDevice server;
+  //const Home({required this.server});
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
   bool _loading = true;
-  List<DrawingArea?> points = [];
+  List<DrawingArea?> points_black = [];
+  List<DrawingArea?> points_green = [];
+  List<DrawingArea?> points_blue = [];
+  List<DrawingArea?> points_red = [];
   Widget? imageOutput;
   ByteData imgBytes = ByteData(1024);
   var img1;
   BluetoothConnection? connection;
   bool canProceedSending = false;
+  Color brushColor = Colors.black;
 
-  void saveToImage(List<DrawingArea?> points) async {
+  saveToImageWrapper(
+      List<DrawingArea?> points_black,
+      List<DrawingArea?> points_blue,
+      List<DrawingArea?> points_green,
+      List<DrawingArea?> points_red) async {
+    await saveToImage(points_black, Colors.black);
+    await Future.delayed(Duration(seconds: 3));
+    await saveToImage(points_blue, Colors.blue.shade900);
+    await Future.delayed(Duration(seconds: 3));
+    await saveToImage(points_green, Colors.green);
+    await Future.delayed(Duration(seconds: 3));
+    await saveToImage(points_red, Colors.red.shade900);
+  }
+
+  Future saveToImage(List<DrawingArea?> points, Color color) async {
     final recorder = ui.PictureRecorder();
     final canvas =
         Canvas(recorder, Rect.fromPoints(Offset(0.0, 0.0), Offset(200, 200)));
     Paint paint = Paint()
-      ..color = Colors.black
+      ..color = color
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 5.0;
+      ..strokeWidth = 1.0;
 
     final paint2 = Paint()
       ..style = PaintingStyle.fill
@@ -59,7 +77,7 @@ class _HomeState extends State<Home> {
 
     File file = await writeBytes(listBytes);
 
-    fetchResponseFromDraw(file);
+    await fetchResponseFromDraw(file);
 
     setState(() {
       imgBytes = pngBytes;
@@ -87,13 +105,13 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void fetchResponseFromDraw(File imageFile) async {
+  Future fetchResponseFromDraw(File imageFile) async {
     final mimeTypeData =
         lookupMimeType(imageFile.path, headerBytes: [0xFF, 0xD8])!.split('/');
     final imageUploadRequest = http.MultipartRequest(
         'POST',
         Uri.parse(
-            'http://192.168.1.104:5000/generate')); //PUT YOUR OWN IP HERE, it may vary depending on your computer
+            'http://192.168.1.138:5000/generate')); //PUT YOUR OWN IP HERE, it may vary depending on your computer
 
     final file = await http.MultipartFile.fromPath('image', imageFile.path,
         contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
@@ -107,13 +125,13 @@ class _HomeState extends State<Home> {
       print(' * STATUS CODE: ${response.statusCode}');
 
       // uncomment after the testing of the sending ends
-      BluetoothConnection.toAddress(widget.server.address).then((_connection) {
-        print('Connected to the device');
-        connection = _connection;
-      }).catchError((error) {
-        print('Cannot connect, exception occured');
-        print(error);
-      });
+      // BluetoothConnection.toAddress(widget.server.address).then((_connection) {
+      //   print('Connected to the device');
+      //   connection = _connection;
+      // }).catchError((error) {
+      //   print('Cannot connect, exception occured');
+      //   print(error);
+      // });
       final Map<String, dynamic> responseData = json.decode(response.body);
       String g_code = responseData['result'];
 
@@ -125,17 +143,17 @@ class _HomeState extends State<Home> {
       //   "G01 X156 Y200",
       //   "G00 X00 Y00"
       // ];
-      await Future.delayed(Duration(seconds: 10));
-      connection!.input!.listen(_onDataReceived);
+      // await Future.delayed(Duration(seconds: 10));
+      // connection!.input!.listen(_onDataReceived);
       List myList = g_code.split("\n");
-      for (int i = 0; i < myList.length; ++i) {
-        String text = myList[i];
-        _sendMessage(text, connection);
-        while (canProceedSending == false) {
-          //Do Nothing until we can procceed to the next command
-        }
-        canProceedSending = false;
-      }
+      // for (int i = 0; i < myList.length; ++i) {
+      //   String text = myList[i];
+      //   _sendMessage(text, connection);
+      //   while (canProceedSending == false) {
+      //     //Do Nothing until we can procceed to the next command
+      //   }
+      //   canProceedSending = false;
+      // }
     } catch (e) {
       print(' * ERROR: ' + e.toString());
       return null;
@@ -286,36 +304,109 @@ class _HomeState extends State<Home> {
                             onPanDown: (details) {
                               this.setState(
                                 () {
-                                  points.add(
-                                    DrawingArea(
-                                        point: details.localPosition,
-                                        areaPaint: Paint()
-                                          ..strokeCap = StrokeCap.round
-                                          ..isAntiAlias = true
-                                          ..color = Colors.black
-                                          ..strokeWidth = 5.0),
-                                  );
+                                  if (brushColor == Colors.black) {
+                                    points_black.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 5.0),
+                                    );
+                                  }
+                                  if (brushColor == Colors.blue.shade900) {
+                                    points_blue.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 5.0),
+                                    );
+                                  }
+                                  if (brushColor == Colors.green) {
+                                    points_green.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 5.0),
+                                    );
+                                  }
+                                  if (brushColor == Colors.red.shade900) {
+                                    points_red.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 5.0),
+                                    );
+                                  }
                                 },
                               );
                             },
                             onPanUpdate: (details) {
                               this.setState(
                                 () {
-                                  points.add(
-                                    DrawingArea(
-                                        point: details.localPosition,
-                                        areaPaint: Paint()
-                                          ..strokeCap = StrokeCap.round
-                                          ..isAntiAlias = true
-                                          ..color = Colors.black
-                                          ..strokeWidth = 5.0),
-                                  );
+                                  if (brushColor == Colors.black) {
+                                    points_black.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 5.0),
+                                    );
+                                  }
+                                  if (brushColor == Colors.blue.shade900) {
+                                    points_blue.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 5.0),
+                                    );
+                                  }
+                                  if (brushColor == Colors.green) {
+                                    points_green.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 5.0),
+                                    );
+                                  }
+                                  if (brushColor == Colors.red.shade900) {
+                                    points_red.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 5.0),
+                                    );
+                                  }
                                 },
                               );
                             },
                             onPanEnd: (details) {
                               this.setState(() {
-                                points.add(null);
+                                points_black.add(null);
+                                points_blue.add(null);
+                                points_red.add(null);
+                                points_green.add(null);
                               });
                             },
                             child: SizedBox.expand(
@@ -323,13 +414,17 @@ class _HomeState extends State<Home> {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(20)),
                               child: CustomPaint(
-                                  painter: MyCustomPainter(points: points)),
+                                  painter: MyCustomPainter(
+                                      points_black: points_black,
+                                      points_blue: points_blue,
+                                      points_red: points_red,
+                                      points_green: points_green)),
                             )),
                           ),
                         ),
                       ),
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.80,
+                        width: MediaQuery.of(context).size.width * 0.9,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.all(
@@ -346,7 +441,8 @@ class _HomeState extends State<Home> {
                                 color: Colors.black,
                               ),
                               onPressed: () {
-                                saveToImage(points);
+                                saveToImageWrapper(points_black, points_blue,
+                                    points_green, points_red);
                                 _loading = false;
                               },
                             ),
@@ -357,7 +453,10 @@ class _HomeState extends State<Home> {
                               ),
                               onPressed: () {
                                 this.setState(() {
-                                  points.clear();
+                                  points_black.clear();
+                                  points_blue.clear();
+                                  points_red.clear();
+                                  points_green.clear();
                                 });
                               },
                             ),
@@ -369,6 +468,50 @@ class _HomeState extends State<Home> {
                               onPressed: () {
                                 _loading = false;
                                 pickImage();
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.brush_rounded,
+                                color: Colors.blue.shade900,
+                              ),
+                              onPressed: () {
+                                this.setState(() {
+                                  brushColor = Colors.blue.shade900;
+                                });
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.brush_rounded,
+                                color: Colors.red.shade900,
+                              ),
+                              onPressed: () {
+                                this.setState(() {
+                                  brushColor = Colors.red.shade900;
+                                });
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.brush_rounded,
+                                color: Colors.green,
+                              ),
+                              onPressed: () {
+                                this.setState(() {
+                                  brushColor = Colors.green;
+                                });
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.brush_rounded,
+                                color: Colors.black,
+                              ),
+                              onPressed: () {
+                                this.setState(() {
+                                  brushColor = Colors.black;
+                                });
                               },
                             ),
                           ],

@@ -263,21 +263,22 @@ class _MainPage extends State<MainPage> {
               title: ElevatedButton(
                 child: const Text('Connect to a paired device and Draw'),
                 onPressed: () async {
-                  final BluetoothDevice? selectedDevice =
-                      await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return SelectBondedDevicePage(checkAvailability: false);
-                      },
-                    ),
-                  );
+                  // final BluetoothDevice? selectedDevice =
+                  //     await Navigator.of(context).push(
+                  //   MaterialPageRoute(
+                  //     builder: (context) {
+                  //       return SelectBondedDevicePage(checkAvailability: false);
+                  //     },
+                  //   ),
+                  // );
 
-                  if (selectedDevice != null) {
-                    print('Connect -> selected ' + selectedDevice.address);
-                    _startDraw(context, selectedDevice);
-                  } else {
-                    print('Connect -> no device selected');
-                  }
+                  // if (selectedDevice != null) {
+                  // print('Connect -> selected ' + selectedDevice.address);
+                  // _startDraw(context, selectedDevice);
+                  _startDraw(context);
+                  // } else {
+                  //   print('Connect -> no device selected');
+                  // }
                 },
               ),
             ),
@@ -350,11 +351,13 @@ class _MainPage extends State<MainPage> {
     );
   }
 
-  void _startDraw(BuildContext context, BluetoothDevice server) {
+  // void _startDraw(BuildContext context, BluetoothDevice server) {
+  void _startDraw(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
-          return Home(server: server);
+          // return Home(server: server);
+          return Home();
         },
       ),
     );
