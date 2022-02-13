@@ -11,7 +11,6 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import './SelectBondedDevicePage.dart';
 
 class Home extends StatefulWidget {
   final BluetoothDevice server;
@@ -39,9 +38,8 @@ class _HomeState extends State<Home> {
     super.initState();
     print("check both connections addresses");
     print(widget.server.address);
-    myAsynInit().then((result) {
-      return BluetoothConnection.toAddress(result.address);
-    }).then((_connection) {
+
+    BluetoothConnection.toAddress(widget.server.address).then((_connection) {
       // BluetoothConnection.toAddress("00:21:04:08:3B:86").then((_connection) {
       print('Connected to the device');
       connection = _connection;
@@ -56,6 +54,9 @@ class _HomeState extends State<Home> {
           setState(() {});
         }
       });
+    }).catchError((error) {
+      print('Cannot connect, exception occured');
+      print(error);
     });
   }
 
@@ -71,17 +72,6 @@ class _HomeState extends State<Home> {
     await saveToImage(points_green, Colors.green);
     await Future.delayed(Duration(seconds: 3));
     await saveToImage(points_red, Colors.red.shade900);
-  }
-
-  Future myAsynInit() async {
-    final BluetoothDevice? selectedDevice = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) {
-          return SelectBondedDevicePage(checkAvailability: false);
-        },
-      ),
-    );
-    return selectedDevice;
   }
 
   Future saveToImage(List<DrawingArea?> points, Color color) async {
@@ -149,19 +139,19 @@ class _HomeState extends State<Home> {
         Uri.parse(
             'http://192.168.1.138:5000/generate')); //PUT YOUR OWN IP HERE, it may vary depending on your computer
 
-    final file = await http.MultipartFile.fromPath('image', imageFile.path,
-        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
+    // final file = await http.MultipartFile.fromPath('image', imageFile.path,
+    //     contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
 
-    imageUploadRequest.fields['ext'] = mimeTypeData[1];
-    imageUploadRequest.files.add(file);
+    // imageUploadRequest.fields['ext'] = mimeTypeData[1];
+    // imageUploadRequest.files.add(file);
 
     try {
-      final streamedResponse = await imageUploadRequest.send();
-      final response = await http.Response.fromStream(streamedResponse);
-      print(' * STATUS CODE: ${response.statusCode}');
+      // final streamedResponse = await imageUploadRequest.send();
+      // final response = await http.Response.fromStream(streamedResponse);
+      // print(' * STATUS CODE: ${response.statusCode}');
 
-      final Map<String, dynamic> responseData = json.decode(response.body);
-      String g_code = responseData['result'];
+      // final Map<String, dynamic> responseData = json.decode(response.body);
+      // String g_code = responseData['result'];
 
       //testing purpose delete afterwards
       // List myList = [
@@ -173,18 +163,19 @@ class _HomeState extends State<Home> {
       // ];
       // await Future.delayed(Duration(seconds: 10));
       // connection!.input!.listen(_onDataReceived);
-      List myList = g_code.split("\n");
+      // List myList = g_code.split("\n");
+      List myList = ["gggg"];
       for (int i = 0; i < myList.length; ++i) {
         String text = myList[i];
         // _sendMessage(text, connection);
         if (isConnected) {
-          _sendMessage("T105");
+          await _sendMessage("T105");
         }
         // connection!.input!.listen(_onDataReceived);
-        Future.delayed(Duration(milliseconds: 333));
-        while (canProceedSending == false) {
-          //Do Nothing until we can procceed to the next command
-        }
+        // Future.delayed(Duration(milliseconds: 333));
+        // while (canProceedSending == false) {
+        //   //Do Nothing until we can procceed to the next command
+        // }
         canProceedSending = false;
       }
     } catch (e) {
@@ -201,7 +192,7 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void _sendMessage(String text) async {
+  Future _sendMessage(String text) async {
     text = text.trim();
     if (text.length > 0) {
       try {

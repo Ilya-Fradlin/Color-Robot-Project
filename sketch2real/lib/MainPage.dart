@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -366,14 +367,18 @@ class _MainPage extends State<MainPage> {
 
   void _startDraw(BuildContext context, BluetoothDevice server) {
     // void _startDraw(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) {
-          return Home(server: server);
-          // return Home();
-        },
-      ),
-    );
+    SchedulerBinding.instance?.addPostFrameCallback((_) {
+      // add your code here.
+
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) {
+            return Home(server: server);
+            // return Home();
+          },
+        ),
+      );
+    });
   }
 
   Future<void> _startBackgroundTask(
