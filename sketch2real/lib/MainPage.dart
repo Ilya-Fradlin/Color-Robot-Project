@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -10,6 +10,7 @@ import './ChatPage.dart';
 import './DiscoveryPage.dart';
 import './SelectBondedDevicePage.dart';
 import 'package:picturegenerator/home.dart';
+import 'dart:typed_data';
 
 // import './helpers/LineChart.dart';
 
@@ -250,6 +251,12 @@ class _MainPage extends State<MainPage> {
                   );
 
                   if (selectedDevice != null) {
+                    // BluetoothConnection.toAddress(selectedDevice.address)
+                    //     .then((_connection) {
+                    //   var connection = _connection;
+                    //   connection.output.add(
+                    //       Uint8List.fromList(utf8.encode("T105" + "\r\n")));
+                    // });
                     print('Connect -> selected ' + selectedDevice.address);
                     _startChat(context, selectedDevice);
                   } else {
@@ -263,22 +270,28 @@ class _MainPage extends State<MainPage> {
               title: ElevatedButton(
                 child: const Text('Connect to a paired device and Draw'),
                 onPressed: () async {
-                  // final BluetoothDevice? selectedDevice =
-                  //     await Navigator.of(context).push(
-                  //   MaterialPageRoute(
-                  //     builder: (context) {
-                  //       return SelectBondedDevicePage(checkAvailability: false);
-                  //     },
-                  //   ),
-                  // );
+                  final BluetoothDevice? selectedDevice =
+                      await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return SelectBondedDevicePage(checkAvailability: false);
+                      },
+                    ),
+                  );
 
-                  // if (selectedDevice != null) {
-                  // print('Connect -> selected ' + selectedDevice.address);
-                  // _startDraw(context, selectedDevice);
-                  _startDraw(context);
-                  // } else {
-                  //   print('Connect -> no device selected');
-                  // }
+                  if (selectedDevice != null) {
+                    // BluetoothConnection.toAddress(selectedDevice.address)
+                    //     .then((_connection) {
+                    //   var connection = _connection;
+                    //   connection.output.add(
+                    //       Uint8List.fromList(utf8.encode("T105" + "\r\n")));
+                    // });
+                    print('Connect -> selected ' + selectedDevice.address);
+                    _startDraw(context, selectedDevice);
+                    // _startDraw(context);
+                  } else {
+                    print('Connect -> no device selected');
+                  }
                 },
               ),
             ),
@@ -351,13 +364,13 @@ class _MainPage extends State<MainPage> {
     );
   }
 
-  // void _startDraw(BuildContext context, BluetoothDevice server) {
-  void _startDraw(BuildContext context) {
+  void _startDraw(BuildContext context, BluetoothDevice server) {
+    // void _startDraw(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
-          // return Home(server: server);
-          return Home();
+          return Home(server: server);
+          // return Home();
         },
       ),
     );

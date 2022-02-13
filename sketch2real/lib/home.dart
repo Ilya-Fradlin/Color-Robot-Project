@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'dart:ffi';
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mime/mime.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -11,14 +10,14 @@ import 'dart:ui' as ui;
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:file_picker/file_picker.dart';
-import './SelectBondedDevicePage.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import './SelectBondedDevicePage.dart';
 
 class Home extends StatefulWidget {
-  //final BluetoothDevice server;
-  //const Home({required this.server});
+  final BluetoothDevice server;
+  const Home({required this.server});
   @override
-  _HomeState createState() => _HomeState();
+  _HomeState createState() => new _HomeState();
 }
 
 class _HomeState extends State<Home> {
@@ -31,8 +30,34 @@ class _HomeState extends State<Home> {
   ByteData imgBytes = ByteData(1024);
   var img1;
   BluetoothConnection? connection;
+  bool get isConnected => (connection?.isConnected ?? false);
   bool canProceedSending = false;
   Color brushColor = Colors.black;
+
+  @override
+  void initState() {
+    super.initState();
+    print("check both connections addresses");
+    print(widget.server.address);
+    myAsynInit().then((result) {
+      return BluetoothConnection.toAddress(result.address);
+    }).then((_connection) {
+      // BluetoothConnection.toAddress("00:21:04:08:3B:86").then((_connection) {
+      print('Connected to the device');
+      connection = _connection;
+      // connection!.output.add(Uint8List.fromList(utf8.encode("T105" + "\r\n")));
+      print("check connections equal");
+      print(connection);
+      setState(() {});
+      //_sendMessage("T105");
+      connection!.input!.listen(_onDataReceived).onDone(() {
+        //Do nothing
+        if (this.mounted) {
+          setState(() {});
+        }
+      });
+    });
+  }
 
   saveToImageWrapper(
       List<DrawingArea?> points_black,
@@ -46,6 +71,17 @@ class _HomeState extends State<Home> {
     await saveToImage(points_green, Colors.green);
     await Future.delayed(Duration(seconds: 3));
     await saveToImage(points_red, Colors.red.shade900);
+  }
+
+  Future myAsynInit() async {
+    final BluetoothDevice? selectedDevice = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return SelectBondedDevicePage(checkAvailability: false);
+        },
+      ),
+    );
+    return selectedDevice;
   }
 
   Future saveToImage(List<DrawingArea?> points, Color color) async {
@@ -124,14 +160,6 @@ class _HomeState extends State<Home> {
       final response = await http.Response.fromStream(streamedResponse);
       print(' * STATUS CODE: ${response.statusCode}');
 
-      // uncomment after the testing of the sending ends
-      // BluetoothConnection.toAddress(widget.server.address).then((_connection) {
-      //   print('Connected to the device');
-      //   connection = _connection;
-      // }).catchError((error) {
-      //   print('Cannot connect, exception occured');
-      //   print(error);
-      // });
       final Map<String, dynamic> responseData = json.decode(response.body);
       String g_code = responseData['result'];
 
@@ -146,14 +174,19 @@ class _HomeState extends State<Home> {
       // await Future.delayed(Duration(seconds: 10));
       // connection!.input!.listen(_onDataReceived);
       List myList = g_code.split("\n");
-      // for (int i = 0; i < myList.length; ++i) {
-      //   String text = myList[i];
-      //   _sendMessage(text, connection);
-      //   while (canProceedSending == false) {
-      //     //Do Nothing until we can procceed to the next command
-      //   }
-      //   canProceedSending = false;
-      // }
+      for (int i = 0; i < myList.length; ++i) {
+        String text = myList[i];
+        // _sendMessage(text, connection);
+        if (isConnected) {
+          _sendMessage("T105");
+        }
+        // connection!.input!.listen(_onDataReceived);
+        Future.delayed(Duration(milliseconds: 333));
+        while (canProceedSending == false) {
+          //Do Nothing until we can procceed to the next command
+        }
+        canProceedSending = false;
+      }
     } catch (e) {
       print(' * ERROR: ' + e.toString());
       return null;
@@ -168,15 +201,17 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void _sendMessage(String text, BluetoothConnection? connection) async {
+  void _sendMessage(String text) async {
     text = text.trim();
     if (text.length > 0) {
       try {
+        // connection!.output.add(Uint8List.fromList(utf8.encode(text + "\r\n")));
         connection!.output.add(Uint8List.fromList(utf8.encode(text + "\r\n")));
-        await connection.output.allSent;
+        await connection!.output.allSent;
       } catch (e) {
         // Ignore error, but notify state
-        print("");
+        print(e);
+        setState(() {});
       }
     }
   }
@@ -238,6 +273,17 @@ class _HomeState extends State<Home> {
     final file = await _localFile;
 
     return file.writeAsBytes(listBytes, flush: true);
+  }
+
+  @override
+  void dispose() {
+    // Avoid memory leak (`setState` after dispose) and disconnect
+    if (isConnected) {
+      connection?.dispose();
+      connection = null;
+    }
+
+    super.dispose();
   }
 
   @override

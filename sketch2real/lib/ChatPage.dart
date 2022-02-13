@@ -40,15 +40,19 @@ class _ChatPage extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-
+    print("check both connections addresses");
+    print(widget.server.address);
     BluetoothConnection.toAddress(widget.server.address).then((_connection) {
       print('Connected to the device');
       connection = _connection;
+      print("check connections equal");
+      print(connection);
       setState(() {
         isConnecting = false;
         isDisconnecting = false;
       });
 
+      //_sendMessage("T105");
       connection!.input!.listen(_onDataReceived).onDone(() {
         // Example: Detect which side closed the connection
         // There should be `isDisconnecting` flag to show are we are (locally)
@@ -218,6 +222,8 @@ class _ChatPage extends State<ChatPage> {
     if (text.length > 0) {
       try {
         connection!.output.add(Uint8List.fromList(utf8.encode(text + "\r\n")));
+        // connection!.output
+        //     .add(Uint8List.fromList(utf8.encode("T105" + "\r\n")));
         await connection!.output.allSent;
 
         setState(() {
