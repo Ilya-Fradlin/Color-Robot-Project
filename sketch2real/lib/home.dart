@@ -60,18 +60,51 @@ class _HomeState extends State<Home> {
     });
   }
 
-  saveToImageWrapper(
+  Future saveToImageWrapper(
       List<DrawingArea?> points_black,
       List<DrawingArea?> points_blue,
       List<DrawingArea?> points_green,
       List<DrawingArea?> points_red) async {
-    await saveToImage(points_black, Colors.black);
-    await Future.delayed(Duration(seconds: 3));
-    await saveToImage(points_blue, Colors.blue.shade900);
-    await Future.delayed(Duration(seconds: 3));
-    await saveToImage(points_green, Colors.green);
-    await Future.delayed(Duration(seconds: 3));
-    await saveToImage(points_red, Colors.red.shade900);
+    for (int i = 0; i < points_black.length; ++i) {
+      if (points_black[i] != null) {
+        await saveToImage(points_black, Colors.black);
+        break;
+      }
+    }
+    _sendMessage("T104");
+    await Future.delayed(Duration(seconds: 5));
+    _sendMessage("C101");
+    await Future.delayed(Duration(seconds: 5));
+    for (int i = 0; i < points_blue.length; ++i) {
+      if (points_blue[i] != null) {
+        await saveToImage(points_blue, Colors.black);
+        break;
+      }
+    }
+    _sendMessage("T104");
+    await Future.delayed(Duration(seconds: 5));
+    _sendMessage("C101");
+    await Future.delayed(Duration(seconds: 5));
+    for (int i = 0; i < points_red.length; ++i) {
+      if (points_red[i] != null) {
+        await saveToImage(points_red, Colors.black);
+        break;
+      }
+    }
+    _sendMessage("T104");
+    await Future.delayed(Duration(seconds: 5));
+    _sendMessage("C101");
+    await Future.delayed(Duration(seconds: 5));
+    for (int i = 0; i < points_green.length; ++i) {
+      if (points_green[i] != null) {
+        await saveToImage(points_green, Colors.black);
+        break;
+      }
+    }
+    _sendMessage("T104");
+    await Future.delayed(Duration(seconds: 5));
+    _sendMessage("C101");
+    await Future.delayed(Duration(seconds: 5));
   }
 
   Future saveToImage(List<DrawingArea?> points, Color color) async {
@@ -81,7 +114,7 @@ class _HomeState extends State<Home> {
     Paint paint = Paint()
       ..color = color
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 1.0;
+      ..strokeWidth = 2.0;
 
     final paint2 = Paint()
       ..style = PaintingStyle.fill
@@ -139,43 +172,31 @@ class _HomeState extends State<Home> {
         Uri.parse(
             'http://192.168.1.138:5000/generate')); //PUT YOUR OWN IP HERE, it may vary depending on your computer
 
-    // final file = await http.MultipartFile.fromPath('image', imageFile.path,
-    //     contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
+    final file = await http.MultipartFile.fromPath('image', imageFile.path,
+        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
 
-    // imageUploadRequest.fields['ext'] = mimeTypeData[1];
-    // imageUploadRequest.files.add(file);
+    imageUploadRequest.fields['ext'] = mimeTypeData[1];
+    imageUploadRequest.files.add(file);
 
     try {
-      // final streamedResponse = await imageUploadRequest.send();
-      // final response = await http.Response.fromStream(streamedResponse);
-      // print(' * STATUS CODE: ${response.statusCode}');
+      canProceedSending = false;
+      final streamedResponse = await imageUploadRequest.send();
+      final response = await http.Response.fromStream(streamedResponse);
 
-      // final Map<String, dynamic> responseData = json.decode(response.body);
-      // String g_code = responseData['result'];
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      String g_code = responseData['result'];
 
-      //testing purpose delete afterwards
-      // List myList = [
-      //   "G01 X124 Y128",
-      //   "G00 X68 Y87",
-      //   "G01 X30 Y57",
-      //   "G01 X156 Y200",
-      //   "G00 X00 Y00"
-      // ];
-      // await Future.delayed(Duration(seconds: 10));
-      // connection!.input!.listen(_onDataReceived);
-      // List myList = g_code.split("\n");
-      List myList = ["gggg"];
+      List myList = g_code.split("\n");
+      // List myList = ["T105", "T104", "T105", "T104"];
       for (int i = 0; i < myList.length; ++i) {
         String text = myList[i];
         // _sendMessage(text, connection);
         if (isConnected) {
-          await _sendMessage("T105");
+          _sendMessage(text);
         }
-        // connection!.input!.listen(_onDataReceived);
-        // Future.delayed(Duration(milliseconds: 333));
-        // while (canProceedSending == false) {
-        //   //Do Nothing until we can procceed to the next command
-        // }
+        while (canProceedSending == false) {
+          await Future.delayed(Duration(milliseconds: 10));
+        }
         canProceedSending = false;
       }
     } catch (e) {
@@ -187,7 +208,7 @@ class _HomeState extends State<Home> {
   void _onDataReceived(Uint8List data) {
     // Do Nothing on the recieved data
     String dataString = String.fromCharCodes(data);
-    if (dataString.contains("19")) {
+    if (dataString.contains("17")) {
       canProceedSending = true;
     }
   }
@@ -206,6 +227,11 @@ class _HomeState extends State<Home> {
       }
     }
   }
+
+  // Future _sendMessageWrapper(String text) async {
+  //   _sendMessage(text);
+  //   await Future.delayed(Duration(milliseconds: 300));
+  // }
 
   void fetchResponse(File imageFile) async {
     final mimeTypeData =
@@ -349,7 +375,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 5.0),
+                                            ..strokeWidth = 2.0),
                                     );
                                   }
                                   if (brushColor == Colors.blue.shade900) {
@@ -360,7 +386,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 5.0),
+                                            ..strokeWidth = 2.0),
                                     );
                                   }
                                   if (brushColor == Colors.green) {
@@ -371,7 +397,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 5.0),
+                                            ..strokeWidth = 2.0),
                                     );
                                   }
                                   if (brushColor == Colors.red.shade900) {
@@ -382,7 +408,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 5.0),
+                                            ..strokeWidth = 2.0),
                                     );
                                   }
                                 },
@@ -399,7 +425,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 5.0),
+                                            ..strokeWidth = 2.0),
                                     );
                                   }
                                   if (brushColor == Colors.blue.shade900) {
@@ -410,7 +436,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 5.0),
+                                            ..strokeWidth = 2.0),
                                     );
                                   }
                                   if (brushColor == Colors.green) {
@@ -421,7 +447,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 5.0),
+                                            ..strokeWidth = 2.0),
                                     );
                                   }
                                   if (brushColor == Colors.red.shade900) {
@@ -432,7 +458,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 5.0),
+                                            ..strokeWidth = 2.0),
                                     );
                                   }
                                 },
@@ -477,9 +503,9 @@ class _HomeState extends State<Home> {
                                 Icons.save,
                                 color: Colors.black,
                               ),
-                              onPressed: () {
-                                saveToImageWrapper(points_black, points_blue,
-                                    points_green, points_red);
+                              onPressed: () async {
+                                await saveToImageWrapper(points_black,
+                                    points_blue, points_green, points_red);
                                 _loading = false;
                               },
                             ),
