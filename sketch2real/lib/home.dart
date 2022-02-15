@@ -114,7 +114,7 @@ class _HomeState extends State<Home> {
     Paint paint = Paint()
       ..color = color
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 2.0;
+      ..strokeWidth = 1.56;
 
     final paint2 = Paint()
       ..style = PaintingStyle.fill
@@ -375,7 +375,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 2.0),
+                                            ..strokeWidth = 1.56),
                                     );
                                   }
                                   if (brushColor == Colors.blue.shade900) {
@@ -386,7 +386,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 2.0),
+                                            ..strokeWidth = 1.56),
                                     );
                                   }
                                   if (brushColor == Colors.green) {
@@ -397,7 +397,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 2.0),
+                                            ..strokeWidth = 1.56),
                                     );
                                   }
                                   if (brushColor == Colors.red.shade900) {
@@ -408,7 +408,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 2.0),
+                                            ..strokeWidth = 1.56),
                                     );
                                   }
                                 },
@@ -425,7 +425,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 2.0),
+                                            ..strokeWidth = 1.56),
                                     );
                                   }
                                   if (brushColor == Colors.blue.shade900) {
@@ -436,7 +436,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 2.0),
+                                            ..strokeWidth = 1.56),
                                     );
                                   }
                                   if (brushColor == Colors.green) {
@@ -447,7 +447,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 2.0),
+                                            ..strokeWidth = 1.56),
                                     );
                                   }
                                   if (brushColor == Colors.red.shade900) {
@@ -458,7 +458,7 @@ class _HomeState extends State<Home> {
                                             ..strokeCap = StrokeCap.round
                                             ..isAntiAlias = true
                                             ..color = brushColor
-                                            ..strokeWidth = 2.0),
+                                            ..strokeWidth = 1.56),
                                     );
                                   }
                                 },
