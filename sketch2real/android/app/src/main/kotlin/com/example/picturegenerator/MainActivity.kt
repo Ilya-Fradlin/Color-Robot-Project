@@ -1,4 +1,4 @@
-package com.example.picturegenerator
+package com.example.drawingrobot
 
 import io.flutter.embedding.android.FlutterActivity
 

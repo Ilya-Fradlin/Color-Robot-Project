@@ -643,6 +643,7 @@ def linePointDist(m, b, p):
 	return abs(n / d)
 
 
-
-
+#  export FLASK_APP="main.py"
+# export FLASK_DEV="development"
+# flask run -h 192.168.1.104
 

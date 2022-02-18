@@ -40,15 +40,19 @@ class _ChatPage extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-
+    print("check both connections addresses");
+    print(widget.server.address);
     BluetoothConnection.toAddress(widget.server.address).then((_connection) {
       print('Connected to the device');
       connection = _connection;
+      print("check connections equal");
+      print(connection);
       setState(() {
         isConnecting = false;
         isDisconnecting = false;
       });
 
+      //_sendMessage("T105");
       connection!.input!.listen(_onDataReceived).onDone(() {
         // Example: Detect which side closed the connection
         // There should be `isDisconnecting` flag to show are we are (locally)
@@ -98,8 +102,7 @@ class _ChatPage extends State<ChatPage> {
             margin: EdgeInsets.only(bottom: 8.0, left: 8.0, right: 8.0),
             width: 222.0,
             decoration: BoxDecoration(
-                color:
-                    _message.whom == clientID ? Colors.blueAccent : Colors.grey,
+                color: _message.whom == clientID ? Colors.black : Colors.grey,
                 borderRadius: BorderRadius.circular(7.0)),
           ),
         ],
@@ -112,51 +115,72 @@ class _ChatPage extends State<ChatPage> {
     final serverName = widget.server.name ?? "Unknown";
     return Scaffold(
       appBar: AppBar(
+          backgroundColor: Colors.black87,
           title: (isConnecting
               ? Text('Connecting chat to ' + serverName + '...')
               : isConnected
                   ? Text('Live chat with ' + serverName)
                   : Text('Chat log with ' + serverName))),
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Flexible(
-              child: ListView(
-                  padding: const EdgeInsets.all(12.0),
-                  controller: listScrollController,
-                  children: list),
-            ),
-            Row(
-              children: <Widget>[
-                Flexible(
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 16.0),
-                    child: TextField(
-                      style: const TextStyle(fontSize: 15.0),
-                      controller: textEditingController,
-                      decoration: InputDecoration.collapsed(
-                        hintText: isConnecting
-                            ? 'Wait until connected...'
-                            : isConnected
-                                ? 'Type your message...'
-                                : 'Chat got disconnected',
-                        hintStyle: const TextStyle(color: Colors.grey),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              // Color(0xFFffd200),
+              // Color(0xFFF7971E),
+              Color.fromRGBO(138, 35, 135, 1.0),
+              Color.fromRGBO(233, 64, 87, 1.0),
+              Color.fromRGBO(242, 113, 33, 1.0)
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: <Widget>[
+              Flexible(
+                child: ListView(
+                    padding: const EdgeInsets.all(12.0),
+                    controller: listScrollController,
+                    children: list),
+              ),
+              Container(
+                decoration: BoxDecoration(color: Colors.grey.shade900),
+                child: Row(
+                  children: <Widget>[
+                    Flexible(
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 16.0),
+                        child: TextField(
+                          style: const TextStyle(
+                              fontSize: 15.0, color: Colors.white),
+                          controller: textEditingController,
+                          decoration: InputDecoration.collapsed(
+                            hintText: isConnecting
+                                ? 'Wait until connected...'
+                                : isConnected
+                                    ? 'Type your message...'
+                                    : 'Chat got disconnected',
+                            hintStyle: const TextStyle(color: Colors.white),
+                          ),
+                          enabled: isConnected,
+                        ),
                       ),
-                      enabled: isConnected,
                     ),
-                  ),
+                    Container(
+                      margin: const EdgeInsets.all(8.0),
+                      child: IconButton(
+                          color: Colors.white,
+                          icon: const Icon(Icons.send),
+                          onPressed: isConnected
+                              ? () => _sendMessage(textEditingController.text)
+                              : null),
+                    ),
+                  ],
                 ),
-                Container(
-                  margin: const EdgeInsets.all(8.0),
-                  child: IconButton(
-                      icon: const Icon(Icons.send),
-                      onPressed: isConnected
-                          ? () => _sendMessage(textEditingController.text)
-                          : null),
-                ),
-              ],
-            )
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -218,6 +242,8 @@ class _ChatPage extends State<ChatPage> {
     if (text.length > 0) {
       try {
         connection!.output.add(Uint8List.fromList(utf8.encode(text + "\r\n")));
+        // connection!.output
+        //     .add(Uint8List.fromList(utf8.encode("T105" + "\r\n")));
         await connection!.output.allSent;
 
         setState(() {

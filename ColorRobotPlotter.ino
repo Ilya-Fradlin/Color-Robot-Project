@@ -153,21 +153,21 @@ void loop()
 		character = Serial.read();			  //get character
 		if (index < MAX_LENGTH-1){
 			message[index++] = character;	 //store it
-			Serial.print(character);		   //display it
+			//Serial.print(character);		   //display it
 		}else{
 			Serial.println("");
 			Serial.print(F("Error: buffer overflow"));
 		}
 		if (character=='\n'){		    //Command lines should end with \r\n
 		    message[index]=0;  		  //insert end-of-string char
-			Serial.print(XOFF);			  //tell terminal to stop sending
-			Serial.print(": ");		    //screen formatting
+			//Serial.print(XOFF);			  //tell terminal to stop sending
+			//Serial.print(": ");		    //screen formatting
 
 			process_commands();
 
 			index=0;					      //prepare for next message
 			Serial.print(XON);			//tell terminal to resume sending
-			Serial.print(": ");			//screen formatting
+			//Serial.print(": ");			//screen formatting
 		}
 	}
 }

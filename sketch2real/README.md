@@ -1,4 +1,4 @@
-# picturegenerator
+# drawing robot
 
 A new Flutter project.
 

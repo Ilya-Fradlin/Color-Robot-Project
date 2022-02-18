@@ -121,11 +121,23 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
         .toList();
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.black87,
         title: Text('Select device'),
         actions: <Widget>[
           _isDiscovering
               ? FittedBox(
                   child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color.fromRGBO(138, 35, 135, 1.0),
+                          Color.fromRGBO(233, 64, 87, 1.0),
+                          Color.fromRGBO(242, 113, 33, 1.0)
+                        ],
+                      ),
+                    ),
                     margin: new EdgeInsets.all(16.0),
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
