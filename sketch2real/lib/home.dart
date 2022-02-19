@@ -23,10 +23,10 @@ class _HomeState extends State<Home> {
   bool _loading = true;
   List<DrawingArea?> lastColorList = [];
   Color lastUsedColor = Colors.black;
-  List<List<DrawingArea?>?> black_lists = [];
-  List<List<DrawingArea?>?> blue_lists = [];
-  List<List<DrawingArea?>?> red_lists = [];
-  List<List<DrawingArea?>?> green_lists = [];
+  List<List<DrawingArea?>> black_lists = [];
+  List<List<DrawingArea?>> blue_lists = [];
+  List<List<DrawingArea?>> red_lists = [];
+  List<List<DrawingArea?>> green_lists = [];
   List<DrawingArea?> points_black = [];
   List<DrawingArea?> points_green = [];
   List<DrawingArea?> points_blue = [];
@@ -195,6 +195,10 @@ class _HomeState extends State<Home> {
     } else {
       // User canceled the picker
       setState(() {
+        black_lists.clear();
+        blue_lists.clear();
+        green_lists.clear();
+        red_lists.clear();
         points_black.clear();
         points_blue.clear();
         points_red.clear();
@@ -267,6 +271,99 @@ class _HomeState extends State<Home> {
       }
       canProceedSending = false;
     }
+  }
+
+  Future sendDraeWithNoFlask() async {
+    // await sendNoFlask(black_lists);
+    for (int i = 0; i < points_black.length; ++i) {
+      if (points_black[i] != null) {
+        await sendNoFlask(black_lists);
+        break;
+      }
+    }
+    // _sendMessage("T104");
+    // await Future.delayed(Duration(seconds: 5));
+    _sendMessage("C101");
+    await Future.delayed(Duration(seconds: 3));
+    for (int i = 0; i < points_blue.length; ++i) {
+      if (points_blue[i] != null) {
+        await sendNoFlask(blue_lists);
+        break;
+      }
+    }
+    // _sendMessage("T104");
+    // await Future.delayed(Duration(seconds: 5));
+    _sendMessage("C101");
+    await Future.delayed(Duration(seconds: 3));
+    for (int i = 0; i < points_red.length; ++i) {
+      if (points_red[i] != null) {
+        await sendNoFlask(red_lists);
+        break;
+      }
+    }
+    // _sendMessage("T104");
+    // await Future.delayed(Duration(seconds: 5));
+    _sendMessage("C101");
+    await Future.delayed(Duration(seconds: 3));
+    _sendMessage("T106 L56");
+    await Future.delayed(Duration(seconds: 1));
+    for (int i = 0; i < points_green.length; ++i) {
+      if (points_green[i] != null) {
+        await sendNoFlask(green_lists);
+        break;
+      }
+    }
+    // _sendMessage("T104");
+    // await Future.delayed(Duration(seconds: 5));
+    _sendMessage("C101");
+    await Future.delayed(Duration(seconds: 3));
+  }
+
+  Future sendNoFlask(List<List<DrawingArea?>> myList) async {
+    canProceedSending = false;
+    String myGcode = "";
+    for (int j = 0; j < myList.length; ++j) {
+      List<DrawingArea?> singleList = myList[j];
+      var startingIndex = 0;
+      for (int i = 0; i < singleList.length; ++i) {
+        if (singleList[i] != null) {
+          startingIndex = i;
+          break;
+        }
+      }
+      if (startingIndex == myList.length) {
+        continue;
+      }
+      DrawingArea? firstPoint = singleList[startingIndex];
+      var xCoordinates = firstPoint?.point?.dx;
+      var yCoordinates = firstPoint?.point?.dy;
+      String y_coords = yCoordinates.toString();
+      String x_coords = xCoordinates.toString();
+      _sendMessage("G00 X${x_coords} Y${y_coords}");
+      // myGcode += "G00 X${x_coords} Y${y_coords}\n";
+      while (canProceedSending == false) {
+        await Future.delayed(Duration(milliseconds: 10));
+      }
+      for (int t = startingIndex + 1; t < singleList.length; ++t) {
+        DrawingArea? point = singleList[t];
+        xCoordinates = point?.point?.dx;
+        yCoordinates = point?.point?.dy;
+        String y_coords = yCoordinates.toString();
+        String x_coords = xCoordinates.toString();
+        _sendMessage("G01 X${x_coords} Y${y_coords}");
+        // myGcode += "G01 X${x_coords} Y${y_coords}\n";
+        while (canProceedSending == false) {
+          await Future.delayed(Duration(milliseconds: 10));
+        }
+        canProceedSending = false;
+      }
+    }
+    // myGcode += "G00 X00 Y00\n";
+    _sendMessage("G00 X00 Y00");
+    while (canProceedSending == false) {
+      await Future.delayed(Duration(milliseconds: 10));
+    }
+    print(myGcode);
   }
 
   Future fetchResponseFromDraw(File imageFile) async {
@@ -411,180 +508,105 @@ class _HomeState extends State<Home> {
                               this.setState(
                                 () {
                                   if (brushColor == Colors.black) {
-                                    points_black.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
-                                    lastColorList.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
+                                    DrawingArea point = DrawingArea(
+                                        point: details.localPosition,
+                                        areaPaint: Paint()
+                                          ..strokeCap = StrokeCap.round
+                                          ..isAntiAlias = true
+                                          ..color = brushColor
+                                          ..strokeWidth = 1.56);
+                                    points_black.add(point);
+                                    lastColorList.add(point);
                                     lastUsedColor = brushColor;
                                   }
                                   if (brushColor == Colors.blue.shade900) {
-                                    points_blue.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
-                                    lastColorList.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
+                                    DrawingArea point = DrawingArea(
+                                        point: details.localPosition,
+                                        areaPaint: Paint()
+                                          ..strokeCap = StrokeCap.round
+                                          ..isAntiAlias = true
+                                          ..color = brushColor
+                                          ..strokeWidth = 1.56);
+                                    points_blue.add(point);
+                                    lastColorList.add(point);
                                     lastUsedColor = brushColor;
                                   }
                                   if (brushColor == Colors.green) {
-                                    points_green.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
-                                    lastColorList.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
+                                    DrawingArea point = DrawingArea(
+                                        point: details.localPosition,
+                                        areaPaint: Paint()
+                                          ..strokeCap = StrokeCap.round
+                                          ..isAntiAlias = true
+                                          ..color = brushColor
+                                          ..strokeWidth = 1.56);
+                                    points_green.add(point);
+                                    lastColorList.add(point);
                                     lastUsedColor = brushColor;
                                   }
                                   if (brushColor == Colors.red.shade900) {
-                                    points_red.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
-                                    lastColorList.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
+                                    DrawingArea point = DrawingArea(
+                                        point: details.localPosition,
+                                        areaPaint: Paint()
+                                          ..strokeCap = StrokeCap.round
+                                          ..isAntiAlias = true
+                                          ..color = brushColor
+                                          ..strokeWidth = 1.56);
+                                    points_red.add(point);
+                                    lastColorList.add(point);
                                     lastUsedColor = brushColor;
                                   }
                                 },
                               );
                             },
-                            onPanCancel: () {
-                              print('pan cancel');
-                            },
                             onPanUpdate: (details) {
                               this.setState(
                                 () {
                                   if (brushColor == Colors.black) {
-                                    points_black.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
-                                    lastColorList.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
+                                    DrawingArea point = DrawingArea(
+                                        point: details.localPosition,
+                                        areaPaint: Paint()
+                                          ..strokeCap = StrokeCap.round
+                                          ..isAntiAlias = true
+                                          ..color = brushColor
+                                          ..strokeWidth = 1.56);
+                                    points_black.add(point);
+                                    lastColorList.add(point);
                                     lastUsedColor = brushColor;
                                   }
                                   if (brushColor == Colors.blue.shade900) {
-                                    points_blue.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
-                                    lastColorList.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
+                                    DrawingArea point = DrawingArea(
+                                        point: details.localPosition,
+                                        areaPaint: Paint()
+                                          ..strokeCap = StrokeCap.round
+                                          ..isAntiAlias = true
+                                          ..color = brushColor
+                                          ..strokeWidth = 1.56);
+                                    points_blue.add(point);
+                                    lastColorList.add(point);
                                     lastUsedColor = brushColor;
                                   }
                                   if (brushColor == Colors.green) {
-                                    points_green.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
-                                    lastColorList.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
+                                    DrawingArea point = DrawingArea(
+                                        point: details.localPosition,
+                                        areaPaint: Paint()
+                                          ..strokeCap = StrokeCap.round
+                                          ..isAntiAlias = true
+                                          ..color = brushColor
+                                          ..strokeWidth = 1.56);
+                                    points_green.add(point);
+                                    lastColorList.add(point);
                                     lastUsedColor = brushColor;
                                   }
                                   if (brushColor == Colors.red.shade900) {
-                                    points_red.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
-                                    lastColorList.add(
-                                      DrawingArea(
-                                          point: details.localPosition,
-                                          areaPaint: Paint()
-                                            ..strokeCap = StrokeCap.round
-                                            ..isAntiAlias = true
-                                            ..color = brushColor
-                                            ..strokeWidth = 1.56),
-                                    );
+                                    DrawingArea point = DrawingArea(
+                                        point: details.localPosition,
+                                        areaPaint: Paint()
+                                          ..strokeCap = StrokeCap.round
+                                          ..isAntiAlias = true
+                                          ..color = brushColor
+                                          ..strokeWidth = 1.56);
+                                    points_red.add(point);
+                                    lastColorList.add(point);
                                     lastUsedColor = brushColor;
                                   }
                                 },
@@ -592,6 +614,20 @@ class _HomeState extends State<Home> {
                             },
                             onPanEnd: (details) {
                               this.setState(() {
+                                if (this.lastUsedColor ==
+                                    Colors.blue.shade900) {
+                                  this.blue_lists.add([...this.lastColorList]);
+                                }
+                                if (this.lastUsedColor == Colors.red.shade900) {
+                                  this.red_lists.add([...this.lastColorList]);
+                                }
+                                if (this.lastUsedColor == Colors.green) {
+                                  this.green_lists.add([...this.lastColorList]);
+                                }
+                                if (this.lastUsedColor == Colors.black) {
+                                  this.black_lists.add([...this.lastColorList]);
+                                }
+                                this.lastColorList.clear();
                                 points_black.add(null);
                                 points_blue.add(null);
                                 points_red.add(null);
@@ -633,6 +669,10 @@ class _HomeState extends State<Home> {
                                 await saveToImageWrapper(points_black,
                                     points_blue, points_green, points_red);
                                 this.setState(() {
+                                  black_lists.clear();
+                                  blue_lists.clear();
+                                  green_lists.clear();
+                                  red_lists.clear();
                                   points_black.clear();
                                   points_blue.clear();
                                   points_red.clear();
@@ -648,6 +688,10 @@ class _HomeState extends State<Home> {
                               ),
                               onPressed: () {
                                 this.setState(() {
+                                  black_lists.clear();
+                                  blue_lists.clear();
+                                  green_lists.clear();
+                                  red_lists.clear();
                                   points_black.clear();
                                   points_blue.clear();
                                   points_red.clear();
@@ -708,6 +752,10 @@ class _HomeState extends State<Home> {
                                 _loading = false;
                                 await pickImage();
                                 setState(() {
+                                  black_lists.clear();
+                                  blue_lists.clear();
+                                  green_lists.clear();
+                                  red_lists.clear();
                                   points_black.clear();
                                   points_blue.clear();
                                   points_red.clear();
@@ -849,6 +897,35 @@ class _HomeState extends State<Home> {
                               ),
                               onPressed: () async {
                                 await sendCircle();
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(20.0),
+                          ),
+                        ),
+                        child: Row(
+                          // crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            ElevatedButton(
+                              child: const Text('NoFlask'),
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.black87,
+                                textStyle: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    fontSize: 10.0),
+                                shape: CircleBorder(),
+                              ),
+                              onPressed: () async {
+                                await sendDraeWithNoFlask();
                               },
                             ),
                           ],
