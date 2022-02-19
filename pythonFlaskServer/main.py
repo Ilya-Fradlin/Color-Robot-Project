@@ -46,8 +46,9 @@ def generate():
 			outfile = locally_copy_of_image_path[:-3]+"gcode"
 			toTextFile(outfile, paths)
 			g_code = None
-			with open(outfile,'r') as f:
+			with open(outfile, 'r') as f:
 				g_code = f.read()
+			g_code = g_code_allignment(g_code)
 			response = {'result': g_code}
 	return jsonify(response)
 
@@ -643,7 +644,28 @@ def linePointDist(m, b, p):
 	return abs(n / d)
 
 
-#  export FLASK_APP="main.py"
+def g_code_allignment(g_code):
+	pen_up = True
+	lines = g_code.split('\n')
+	new_g_code = ['G00 X0. Y0.']
+	for line in lines:
+		if line.startswith('Z0'):
+			pen_up = False
+			continue
+		elif line.startswith('Z1'):
+			pen_up = True
+			continue
+		elif line.startswith('X'):
+			prefix = 'G00 ' if pen_up else 'G01 '
+			new_line = prefix + line
+			new_g_code += [new_line]
+		else:
+			continue
+	new_g_code += ["G00 X0. Y0.\n"]
+	new_g_code = '\n'.join(new_g_code)
+	return new_g_code
+
+# export FLASK_APP="main.py"
 # export FLASK_DEV="development"
-# flask run -h 192.168.1.104
+# flask run -h 192.168.1.101
 

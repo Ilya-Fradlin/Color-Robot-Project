@@ -70,8 +70,8 @@ class _HomeState extends State<Home> {
         break;
       }
     }
-    _sendMessage("T104");
-    await Future.delayed(Duration(seconds: 5));
+    // _sendMessage("T104");
+    // await Future.delayed(Duration(seconds: 5));
     _sendMessage("C101");
     await Future.delayed(Duration(seconds: 5));
     for (int i = 0; i < points_blue.length; ++i) {
@@ -80,8 +80,8 @@ class _HomeState extends State<Home> {
         break;
       }
     }
-    _sendMessage("T104");
-    await Future.delayed(Duration(seconds: 5));
+    // _sendMessage("T104");
+    // await Future.delayed(Duration(seconds: 5));
     _sendMessage("C101");
     await Future.delayed(Duration(seconds: 5));
     for (int i = 0; i < points_red.length; ++i) {
@@ -90,8 +90,8 @@ class _HomeState extends State<Home> {
         break;
       }
     }
-    _sendMessage("T104");
-    await Future.delayed(Duration(seconds: 5));
+    // _sendMessage("T104");
+    // await Future.delayed(Duration(seconds: 5));
     _sendMessage("C101");
     await Future.delayed(Duration(seconds: 5));
     for (int i = 0; i < points_green.length; ++i) {
@@ -100,8 +100,8 @@ class _HomeState extends State<Home> {
         break;
       }
     }
-    _sendMessage("T104");
-    await Future.delayed(Duration(seconds: 5));
+    // _sendMessage("T104");
+    // await Future.delayed(Duration(seconds: 5));
     _sendMessage("C101");
     await Future.delayed(Duration(seconds: 5));
   }
@@ -148,7 +148,7 @@ class _HomeState extends State<Home> {
     final imageUploadRequest = http.MultipartRequest(
         'POST',
         Uri.parse(
-            'http://192.168.1.138:5000/generate')); //PUT YOUR OWN IP HERE, it may vary depending on your computer
+            'http://192.168.1.101:5000/generate')); //PUT YOUR OWN IP HERE, it may vary depending on your computer
 
     final file = await http.MultipartFile.fromPath('image', imageFile.path,
         contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
@@ -168,6 +168,9 @@ class _HomeState extends State<Home> {
       // List myList = ["T105", "T104", "T105", "T104"];
       for (int i = 0; i < myList.length; ++i) {
         String text = myList[i];
+        if (text==""){
+          break;
+        }
         // _sendMessage(text, connection);
         if (isConnected) {
           _sendMessage(text);
