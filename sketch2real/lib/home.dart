@@ -21,6 +21,12 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   bool _loading = true;
+  List<DrawingArea?> lastColorList = [];
+  Color lastUsedColor = Colors.black;
+  List<List<DrawingArea?>?> black_lists = [];
+  List<List<DrawingArea?>?> blue_lists = [];
+  List<List<DrawingArea?>?> red_lists = [];
+  List<List<DrawingArea?>?> green_lists = [];
   List<DrawingArea?> points_black = [];
   List<DrawingArea?> points_green = [];
   List<DrawingArea?> points_blue = [];
@@ -414,6 +420,16 @@ class _HomeState extends State<Home> {
                                             ..color = brushColor
                                             ..strokeWidth = 1.56),
                                     );
+                                    lastColorList.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 1.56),
+                                    );
+                                    lastUsedColor = brushColor;
                                   }
                                   if (brushColor == Colors.blue.shade900) {
                                     points_blue.add(
@@ -425,6 +441,16 @@ class _HomeState extends State<Home> {
                                             ..color = brushColor
                                             ..strokeWidth = 1.56),
                                     );
+                                    lastColorList.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 1.56),
+                                    );
+                                    lastUsedColor = brushColor;
                                   }
                                   if (brushColor == Colors.green) {
                                     points_green.add(
@@ -436,6 +462,16 @@ class _HomeState extends State<Home> {
                                             ..color = brushColor
                                             ..strokeWidth = 1.56),
                                     );
+                                    lastColorList.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 1.56),
+                                    );
+                                    lastUsedColor = brushColor;
                                   }
                                   if (brushColor == Colors.red.shade900) {
                                     points_red.add(
@@ -447,9 +483,22 @@ class _HomeState extends State<Home> {
                                             ..color = brushColor
                                             ..strokeWidth = 1.56),
                                     );
+                                    lastColorList.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 1.56),
+                                    );
+                                    lastUsedColor = brushColor;
                                   }
                                 },
                               );
+                            },
+                            onPanCancel: () {
+                              print('pan cancel');
                             },
                             onPanUpdate: (details) {
                               this.setState(
@@ -464,6 +513,16 @@ class _HomeState extends State<Home> {
                                             ..color = brushColor
                                             ..strokeWidth = 1.56),
                                     );
+                                    lastColorList.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 1.56),
+                                    );
+                                    lastUsedColor = brushColor;
                                   }
                                   if (brushColor == Colors.blue.shade900) {
                                     points_blue.add(
@@ -475,6 +534,16 @@ class _HomeState extends State<Home> {
                                             ..color = brushColor
                                             ..strokeWidth = 1.56),
                                     );
+                                    lastColorList.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 1.56),
+                                    );
+                                    lastUsedColor = brushColor;
                                   }
                                   if (brushColor == Colors.green) {
                                     points_green.add(
@@ -486,6 +555,16 @@ class _HomeState extends State<Home> {
                                             ..color = brushColor
                                             ..strokeWidth = 1.56),
                                     );
+                                    lastColorList.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 1.56),
+                                    );
+                                    lastUsedColor = brushColor;
                                   }
                                   if (brushColor == Colors.red.shade900) {
                                     points_red.add(
@@ -497,6 +576,16 @@ class _HomeState extends State<Home> {
                                             ..color = brushColor
                                             ..strokeWidth = 1.56),
                                     );
+                                    lastColorList.add(
+                                      DrawingArea(
+                                          point: details.localPosition,
+                                          areaPaint: Paint()
+                                            ..strokeCap = StrokeCap.round
+                                            ..isAntiAlias = true
+                                            ..color = brushColor
+                                            ..strokeWidth = 1.56),
+                                    );
+                                    lastUsedColor = brushColor;
                                   }
                                 },
                               );
@@ -524,7 +613,7 @@ class _HomeState extends State<Home> {
                         ),
                       ),
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.9,
+                        width: MediaQuery.of(context).size.width * 1,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.all(
@@ -631,7 +720,7 @@ class _HomeState extends State<Home> {
                         ),
                       ),
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.8,
+                        width: MediaQuery.of(context).size.width * 0.9,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.all(
@@ -722,7 +811,7 @@ class _HomeState extends State<Home> {
                         ),
                       ),
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.5,
+                        width: MediaQuery.of(context).size.width * 0.7,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.all(
