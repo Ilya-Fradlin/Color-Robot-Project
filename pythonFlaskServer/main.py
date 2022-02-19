@@ -46,9 +46,9 @@ def generate():
 			outfile = locally_copy_of_image_path[:-3]+"gcode"
 			toTextFile(outfile, paths)
 			g_code = None
-			with open(outfile, 'r') as f:
+			with open(outfile,'r') as f:
 				g_code = f.read()
-			g_code = g_code_allignment(g_code)
+			g_code=processGCode(g_code)
 			response = {'result': g_code}
 	return jsonify(response)
 
@@ -643,29 +643,25 @@ def linePointDist(m, b, p):
 	d = (m ** 2 + 1) ** 0.5
 	return abs(n / d)
 
+def processGCode(g_code):
+	g_code = g_code.replace(".", "")
+	my_g_commands = g_code.split("\n")
+	my_processed_gcode = []
+	for i in range(len(my_g_commands) - 1):
+		if i == 2:
+			my_g_commands[i] = "G00 " + my_g_commands[i]
+		if my_g_commands[i] == "Z1":
+			my_g_commands[i + 1] = "G00 " + my_g_commands[i + 1]
+	for i in range(len(my_g_commands)):
+		if "G00" not in my_g_commands[i]:
+			my_g_commands[i] = "G01 " + my_g_commands[i]
+	for w in my_g_commands:
+		if "Z1" not in w and 'Z0' not in w:
+			my_processed_gcode.append(w)
+	my_str = "\n".join(my_processed_gcode[1:])
+	return my_str
 
-def g_code_allignment(g_code):
-	pen_up = True
-	lines = g_code.split('\n')
-	new_g_code = ['G00 X0. Y0.']
-	for line in lines:
-		if line.startswith('Z0'):
-			pen_up = False
-			continue
-		elif line.startswith('Z1'):
-			pen_up = True
-			continue
-		elif line.startswith('X'):
-			prefix = 'G00 ' if pen_up else 'G01 '
-			new_line = prefix + line
-			new_g_code += [new_line]
-		else:
-			continue
-	new_g_code += ["G00 X0. Y0.\n"]
-	new_g_code = '\n'.join(new_g_code)
-	return new_g_code
 
-# export FLASK_APP="main.py"
-# export FLASK_DEV="development"
-# flask run -h 192.168.1.101
+
+
 
