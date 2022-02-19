@@ -926,6 +926,17 @@ class _HomeState extends State<Home> {
                               ),
                               onPressed: () async {
                                 await sendDraeWithNoFlask();
+                                this.setState(() {
+                                  black_lists.clear();
+                                  blue_lists.clear();
+                                  green_lists.clear();
+                                  red_lists.clear();
+                                  points_black.clear();
+                                  points_blue.clear();
+                                  points_red.clear();
+                                  points_green.clear();
+                                  _loading = true;
+                                });
                               },
                             ),
                           ],
